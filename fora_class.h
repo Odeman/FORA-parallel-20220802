@@ -44,6 +44,7 @@ public:
 private:
     Graph &graph;
     int worker_num;
+    std::minstd_rand rd;
 
 //-----------------voids------------------------------------
 
@@ -60,6 +61,7 @@ public:
         fwd_idx.second.nil =-1;
         fwd_idx.first.initialize(graph.n);
         fwd_idx.second.initialize(graph.n);
+        rd.seed(worker_num+1);
     }
 
     void forward_local_update_linear_CLASS(int s, /*const Graph &graph,*/ double& rsum, double rmax, double init_residual = 1.0){
@@ -131,8 +133,7 @@ public:
     inline int random_walk_CLASS(int start/*, const Graph& graph*/){
         int cur = start;
         unsigned long k;
-        std::minstd_rand rd;
-        rd.seed(worker_num+1);
+
         if(graph.g[start].size()==0){
             return start;
         }
