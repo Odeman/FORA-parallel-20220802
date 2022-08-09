@@ -130,7 +130,7 @@ public:
         }
     }
 
-    inline int random_walk_CLASS(int start/*, const Graph& graph*/){
+    inline int random_walk_CLASS(int start/*, const Graph& graph*/, int& check_path_length){
         int cur = start;
         unsigned long k;
 
@@ -138,12 +138,17 @@ public:
             return start;
         }
         while (true) {
-            if ((rd())<(config.alpha*std::minstd_rand::max())) {
+            int temp=rd();
+            //printf("check random: %d\n", temp);
+            //printf("check threshold: %d\n", config.alpha*std::minstd_rand::max());
+            if ((temp)<(config.alpha*std::minstd_rand::max())) {
                 return cur;
             }
             if (graph.g[cur].size()){
-                k = graph.g[cur].size() * (rd())*(1.0 / (std::minstd_rand::max() + 1.0));
+                //k = graph.g[cur].size() * (rd())*(1.0 / (std::minstd_rand::max() + 1.0));
+                k = rd() % graph.g[cur].size();
                 cur = graph.g[cur][ k ];
+                check_path_length++;
             }
             else{
                 cur = start;
@@ -173,6 +178,8 @@ public:
             double OMP_check_walk_start=omp_get_wtime();
             //----------------Random Walks without Index---------------------------------------------------------
                int check_num_walks=0;
+               int check_path_walks=0;
+               printf("Check Num of nodes: %d\n", fwd_idx.second.occur.m_num);
                for(long i=0; i < fwd_idx.second.occur.m_num; i++){
                    int source = fwd_idx.second.occur[i];
                    double residual = fwd_idx.second[source];
@@ -182,12 +189,15 @@ public:
                    num_total_rw += num_s_rw;
                    check_num_walks+=num_s_rw;
                    for(unsigned long j=0; j<num_s_rw; j++){
-                       int des = random_walk_CLASS(source/*, graph*/);
+                       int des = random_walk_CLASS(source/*, graph*/, check_path_walks);
                        ppr[des] += ppr_incre;
                    }
                }
                printf("------------\n");
+               printf("Check alpha is: %.6f\n", config.alpha);
                printf("Check Num Walks is: %d\n", check_num_walks);
+               printf("Check length of walks is: %d\n", check_path_walks);
+               printf("Check average path length of walks is: %.6f\n", ((double)(check_path_walks))/((double)(check_num_walks)));
                printf("------------\n");
             //----------------Random Walks without Index---------------------------------------------------------
             double OMP_check_walk_end=omp_get_wtime();
@@ -200,7 +210,10 @@ public:
         double rsum = 1.0;
         double total_rsum=0;
         //printf("point1: thread number %d\n", omp_get_thread_num());
+        double OMP_check_forward_push_start=omp_get_wtime();
         forward_local_update_linear_CLASS(v, /*graph,*/ rsum, config.rmax);
+        double OMP_check_forward_push_end=omp_get_wtime();
+        printf("Thread: %d, Check time of push is: %.12f\n", worker_num, OMP_check_forward_push_end-OMP_check_forward_push_start);
         //printf("point2\n");
         compute_ppr_with_fwdidx_CLASS(/*graph,*/ rsum);
         //printf("point3\n");
