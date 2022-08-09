@@ -1441,7 +1441,7 @@ void parallel_query_task(Graph& graph, int worker_num, int query_size){
         }
         source=OMP_workload.queries[head];
         temp=fora_worker.fora_class_query_basic_CLASS(source);
-        printf("Number: %d, check ID: %d, check RESULT: %d\n", head, source, temp);
+        printf("Thread: %d, Number: %d, check ID: %d, check RESULT: %d\n", worker_num, head, source, temp);
         //fora_query_basic(source, graph);
         split_line();
     }
@@ -1474,7 +1474,9 @@ void parallel_query(Graph& graph, int _num_fora_threads){
         std::vector<std::thread> threads;
         for(int i=0; i<num_fora_threads; i++){
             threads.push_back(std::thread([&, i](){
+                double OMP_check_time_start_thread=omp_get_wtime();
                 parallel_query_task(graph, i, query_size);
+                printf("Check_total_time of thread %d, time: %.12f\n", i, omp_get_wtime()-OMP_check_time_start_thread);
             }       
             ));
         }
