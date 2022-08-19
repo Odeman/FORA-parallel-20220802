@@ -33,7 +33,7 @@ struct parallel_workload{
     std::mutex workload_mtx;
 } OMP_workload;
 //---------------------------------Minimum_Cores_WORKLOAD---------------------
-struct parallel_workload{
+struct minimumCores_workload{
     vector<int> queries;
     int head;
     std::mutex workload_mtx;
