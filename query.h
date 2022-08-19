@@ -1516,7 +1516,9 @@ void parallel_query_minimum_cores_real(Graph& graph, int _num_queries, int _time
     load_minimum_cores_real_query(_num_queries);
     printf("------------------load_query_complete!-------------\n");
     unsigned int query_size = Minimum_Cores_workload.queries.size();
-    query_size = std::min( query_size, _num_queries );
+    if(query_size>_num_queries)
+        query_size = _num_queries;
+        
     if(query_size<_num_queries){
         printf("The query size( %d ) is smaller than the input number, PLEASE generate more queries!\n", query_size);
     }
