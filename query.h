@@ -10,6 +10,7 @@
 #include "omp.h"
 #include "fora_class.h"
 #include <algorithm>
+#include <mutex>
 //#define CHECK_PPR_VALUES 1
 // #define CHECK_TOP_K_PPR 1
 #define PRINT_PRECISION_FOR_DIF_K 1
@@ -1507,6 +1508,28 @@ void parallel_query(Graph& graph, int _num_fora_threads){
     //set_result(graph, used_counter, query_size);
 }
 //--------------------------------------------------------------------------------------------------
+//---------------------------------void for parallel------------------------------------------------
+void parallel_query_task_minimum_cores(Graph& graph, int worker_num, int query_size){
+    int head;
+    int source, temp;
+    Fora_class fora_worker(graph, worker_num);
+    while(Minimum_Cores_workload.head < query_size){
+        //omp_set_nest_lock(&OMP_workload.lck);
+        Minimum_Cores_workload.workload_mtx.lock();
+        head=Minimum_Cores_workload.head;
+        Minimum_Cores_workload.head++;
+        //omp_unset_nest_lock(&OMP_workload.lck);
+        Minimum_Cores_workload.workload_mtx.unlock();
+        if(head > query_size){
+            break;
+        }
+        source=Minimum_Cores_workload.queries[head];
+        temp=fora_worker.fora_class_query_basic_CLASS(source);
+        printf("Thread: %d, Number: %d, check ID: %d, check RESULT: %d\n", worker_num, head, source, temp);
+        //fora_query_basic(source, graph);
+        split_line();
+    }
+}
 
 void parallel_query_minimum_cores_real(Graph& graph, int _num_queries, int _time_T, int _num_available_cores){
     printf("-------parallel_query_minimum_cores_real-------\n");
@@ -1543,14 +1566,16 @@ void parallel_query_minimum_cores_real(Graph& graph, int _num_queries, int _time
         for(int i=0; i<num_fora_threads; i++){
             threads.push_back(std::thread([&, i](){
                 double OMP_check_time_start_thread=omp_get_wtime();
-                parallel_query_task(graph, i, query_size);
+                parallel_query_task_minimum_cores(graph, i, query_size);
                 double time_temp=omp_get_wtime()-OMP_check_time_start_thread;
                 printf("Check_total_time of thread %d, time: %.12f\n", i, time_temp);
+                /*
                 t_s_lock.lock();
                 if(t_s_result<time_temp){
                     t_s_result=time_temp;
                 }
                 t_s_lock.unlock();
+                */
             }       
             ));
         }
