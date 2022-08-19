@@ -32,6 +32,12 @@ struct parallel_workload{
     int head;
     std::mutex workload_mtx;
 } OMP_workload;
+//---------------------------------Minimum_Cores_WORKLOAD---------------------
+struct parallel_workload{
+    vector<int> queries;
+    int head;
+    std::mutex workload_mtx;
+} Minimum_Cores_workload;
 
 unordered_map<int, PredResult> pred_results;
 
@@ -541,6 +547,21 @@ void load_parallel_query(){
     int v;
     while(queryfile>>v){
         OMP_workload.queries.push_back(v);
+    }
+}
+//----------------------------------------------------------------------------------------------
+void load_minimum_cores_real_query(int query_number){
+    string filename = config.graph_location+"ssquery.txt";
+     if(!file_exists_test(filename)){
+        cerr<<"query file does not exist, please generate ss query files first"<<endl;
+        exit(0);
+    }
+    //omp_init_nest_lock(&OMP_workload.lck);
+    Minimum_Cores_workload.head=0;
+    ifstream queryfile(filename);
+    int v;
+    while(queryfile>>v){
+        Minimum_Cores_workload.queries.push_back(v);
     }
 }
 //---------------------------------------------------------------------------------------
