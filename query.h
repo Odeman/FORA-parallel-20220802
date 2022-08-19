@@ -1542,7 +1542,7 @@ void parallel_query_minimum_cores_real(Graph& graph, int _num_queries, int _time
             threads.push_back(std::thread([&, i](){
                 double OMP_check_time_start_thread=omp_get_wtime();
                 parallel_query_task(graph, i, query_size);
-                double time_temp=omp_get_wtime()-OMP_check_time_start_thread
+                double time_temp=omp_get_wtime()-OMP_check_time_start_thread;
                 printf("Check_total_time of thread %d, time: %.12f\n", i, time_temp);
                 t_s_lock.lock();
                 if(t_s_result<time_temp){
