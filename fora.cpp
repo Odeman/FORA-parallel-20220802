@@ -219,6 +219,45 @@ int main(int argc, char *argv[]) {
         parallel_query(graph, num_fora_threads);
         INFO("finished query");
     }
+    else if (config.action == MinimumCores_Real) {
+        auto f = find(possibleAlgo.begin(), possibleAlgo.end(), config.algo);
+        assert (f != possibleAlgo.end());
+        if(f == possibleAlgo.end()){
+            INFO("Wrong algo param: ", config.algo);
+            exit(1);
+        }
+
+        config.graph_location = config.get_graph_folder();
+        Graph graph(config.graph_location);
+        INFO("load graph finish");
+        init_parameter(config, graph);
+   
+        INFO("finished initing parameters");
+        INFO(graph.n, graph.m);
+
+        std::cout<<"-----------Start testing MinimumCores_Real algorithm!------------ "<<std::endl;
+        std::cout<<"Input: X queries, time T, available cores AC "<<std::endl;
+        std::cout<<"Output: Minimum cores required to process X queries within time T"<<std::endl;
+        std::cout<<"---------------------------------------"<<std::endl;
+        std::cout<<"Please input the number of queries(X): "<<std::endl;
+        int num_queries;
+        std::cin>>num_queries;
+        std::cout<<"---------------------------------------"<<std::endl;
+        std::cout<<"Please input the time of duration(T): "<<std::endl;
+        int time_T;
+        std::cin>>time_T;
+        std::cout<<"---------------------------------------"<<std::endl;
+        std::cout<<"Please input the number of available cores(AC): "<<std::endl;
+        int num_available_cores;
+        std::cin>>num_available_cores;
+        std::cout<<"----------Input finish, start testing-----------"<<std::endl;
+        /*
+        if(config.with_rw_idx)
+            deserialize_idx();
+        */
+        parallel_query_minimum_cores_real(graph, num_queries, time_T, num_available_cores);
+        INFO("finished query");
+    }
     else if (config.action == GEN_SS_QUERY){
         config.graph_location = config.get_graph_folder();
         Graph graph(config.graph_location);

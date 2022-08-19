@@ -1508,6 +1508,78 @@ void parallel_query(Graph& graph, int _num_fora_threads){
 }
 //--------------------------------------------------------------------------------------------------
 
+void parallel_query_minimum_cores_real(Graph& graph, int _num_queries, int _time_T, int _num_available_cores){
+    printf("-------parallel_query_minimum_cores_real-------\n");
+    INFO(config.algo);
+    //vector<int> queries;
+    //load_parallel_query();
+    load_minimum_cores_real_query(_num_queries);
+    printf("------------------load_query_complete!-------------\n");
+    unsigned int query_size = Minimum_Cores_workload.queries.size();
+    query_size = min( query_size, _num_queries );
+    if(query_size<_num_queries){
+        printf("The query size( %d ) is smaller than the input number, PLEASE generate more queries!\n", query_size);
+    }
+    //INFO(query_size);
+
+    assert(config.rmax_scale >= 0);
+    INFO(config.rmax_scale);
+
+    ppr.init_keys(graph.n);
+
+    if(config.algo == FORA){ //fora
+        //first preprocess AC cores in parallel and determine the maximum running times t_s
+        printf("We first preprocess AC cores in parallel and determine the maximum running times t_s\n");
+        fora_setting(graph.n, graph.m);
+        display_setting();
+        
+        int num_fora_threads=_num_available_cores;
+        double OMP_check_time_start=omp_get_wtime();
+        std::vector<std::thread> threads;
+        std::mutex t_s_lock;
+        double t_s_result=0;
+        for(int i=0; i<num_fora_threads; i++){
+            threads.push_back(std::thread([&, i](){
+                double OMP_check_time_start_thread=omp_get_wtime();
+                parallel_query_task(graph, i, query_size);
+                double time_temp=omp_get_wtime()-OMP_check_time_start_thread
+                printf("Check_total_time of thread %d, time: %.12f\n", i, time_temp);
+                t_s_lock.lock();
+                if(t_s_result<time_temp){
+                    t_s_result=time_temp;
+                }
+                t_s_lock.unlock();
+            }       
+            ));
+        }
+        for (auto &thread : threads) {
+            thread.join();
+        }
+        printf("Check_total_time(t_s): %.12f\n",t_s_result);
+        
+        /*
+        for(int i=0; i<query_size; i++){
+            int source =  queries[i];
+            cout << i+1 <<". source node:" << source << endl;
+            fora_query_basic(source, graph);
+            split_line();
+        }
+        */
+        //double avg_rsum = total_rsum/query_size;
+        //INFO(avg_rsum*config.omega);
+        /*for(auto x: count_ratio){
+            INFO(x.first, x.second);
+        }*/
+    }
+    else {
+        printf("Only {FORA} is supported now. Program end\n");
+    }
+
+    //display_time_usage(used_counter, query_size);
+    //set_result(graph, used_counter, query_size);
+}
+
+//--------------------------------------------------------------------------------------------------
 void query(Graph& graph){
     INFO(config.algo);
     vector<int> queries;

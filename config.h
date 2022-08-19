@@ -32,6 +32,7 @@ const int NUM_OF_QUERY = 20;
 
 const string QUERY = "query";
 const string PARALLEL_QUERY = "parallel_query";
+const string MinimumCores_Real = "minimum_cores_real";
 const string GEN_SS_QUERY = "generate-ss-query";
 const string TOPK = "topk";
 const string BUILD = "build";
@@ -111,7 +112,7 @@ public:
     double omega; // 1/omega  omega = # of random walk
     double rmax; // identical to r_max
 
-    unsigned int query_size = 1000;
+    unsigned int query_size = 5000;
 
     unsigned int max_iter_num = 100;
 
